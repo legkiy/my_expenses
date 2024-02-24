@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:my_expenses/database/expense_databse.dart';
+import 'package:my_expenses/screens/screens.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await ExpenseDatabase.initialize();
 
-  runApp(const MainApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ExpenseDatabase(),
+      child: const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {
@@ -15,13 +22,8 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      title: 'My Expenses',
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
-    );
+        title: 'My Expenses',
+        debugShowCheckedModeBanner: false,
+        home: HomeScreen());
   }
 }
