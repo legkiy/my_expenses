@@ -20,7 +20,7 @@ class ExpenseDatabase extends ChangeNotifier {
 
   // OPERATIONS
 
-  // Create
+  /// Create expense
   Future<void> createNewExpense(Expense newExpense) async {
     // add to isar db
     await isar.writeTxn(() => isar.expenses.put(newExpense));
@@ -28,7 +28,7 @@ class ExpenseDatabase extends ChangeNotifier {
     await readExpense();
   }
 
-  // Read
+  /// Read expenses
   Future<void> readExpense() async {
     List<Expense> fetchExpense = await isar.expenses.where().findAll();
 
@@ -38,7 +38,7 @@ class ExpenseDatabase extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Update
+  /// Update expense
   Future<void> updateExpense(
       {required int id, required Expense updatedExpense}) async {
     updatedExpense.id = id;
@@ -48,10 +48,51 @@ class ExpenseDatabase extends ChangeNotifier {
     await readExpense();
   }
 
-  // Delete
+  /// Delete expense
   Future<void> deleteExpense(int id) async {
     await isar.writeTxn(() => isar.expenses.delete(id));
 
     await readExpense();
+  }
+
+  // HELPERS
+
+  /// calculate total expense for each month
+  Future<Map<int, double>> calculateMonthlyTotals() async {
+    await readExpense();
+    Map<int, double> monthlyTotal = {};
+
+    for (var expense in _allExpenses) {
+      int month = expense.date.month;
+
+      if (!monthlyTotal.containsKey(month)) {
+        monthlyTotal[month] = 0;
+      }
+
+      monthlyTotal[month] = monthlyTotal[month]! + expense.amount;
+    }
+    return monthlyTotal;
+  }
+
+  /// Get start month
+  int getStartMonth() {
+    if (_allExpenses.isEmpty) {
+      return DateTime.now().month;
+    }
+
+    _allExpenses.sort((a, b) => a.date.compareTo(b.date));
+
+    return _allExpenses.first.date.month;
+  }
+
+  /// get start yaer
+  int getStartYear() {
+    if (_allExpenses.isEmpty) {
+      return DateTime.now().year;
+    }
+
+    _allExpenses.sort((a, b) => a.date.compareTo(b.date));
+
+    return _allExpenses.first.date.year;
   }
 }
